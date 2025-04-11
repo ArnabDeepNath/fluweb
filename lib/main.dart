@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 void main() {
+  // Initialize WebView platform before runApp
+  late final PlatformWebViewControllerCreationParams params;
+  if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+    params = WebKitWebViewControllerCreationParams(
+      allowsInlineMediaPlayback: true,
+      mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+    );
+  } else {
+    params = const PlatformWebViewControllerCreationParams();
+  }
+
   runApp(const MyApp());
 }
 
@@ -31,12 +43,25 @@ class WebViewApp extends StatefulWidget {
 
 class _WebViewAppState extends State<WebViewApp> {
   late final WebViewController controller;
+
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
+
+    // Platform-specific initialization
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (url) {
